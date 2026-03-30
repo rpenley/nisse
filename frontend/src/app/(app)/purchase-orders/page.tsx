@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -206,9 +206,8 @@ export default function PurchaseOrdersPage() {
 						</thead>
 						<tbody>
 							{pos.map((po) => (
-								<>
+								<React.Fragment key={po.id}>
 									<tr
-										key={po.id}
 										className="border-b border-[#3c3836] hover:bg-[#3c3836] transition-colors cursor-pointer"
 										onClick={() => fetchItems(po.id)}
 									>
@@ -347,7 +346,7 @@ export default function PurchaseOrdersPage() {
 												</td>
 											</tr>
 										)}
-								</>
+								</React.Fragment>
 							))}
 						</tbody>
 					</table>

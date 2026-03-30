@@ -20,6 +20,7 @@ use crate::state::AppState;
 #[derive(Deserialize)]
 pub struct ListParams {
     pub is_tcg_single: Option<bool>,
+    pub q: Option<String>,
 }
 
 // ── Request bodies ────────────────────────────────────────────────────────────
@@ -78,8 +79,20 @@ pub async fn list(
 }
 
 async fn do_list(state: AppState, params: ListParams) -> Result<Vec<InventoryRow>, AppError> {
-    let rows = match params.is_tcg_single {
-        Some(filter) => {
+    let search = params.q.as_deref().map(|q| format!("%{}%", q));
+
+    let rows = match (params.is_tcg_single, search) {
+        (Some(filter), Some(ref pattern)) => {
+            sqlx::query_as::<_, InventoryRow>(&format!(
+                "{} WHERE p.is_tcg_single = $1 AND (p.name ILIKE $2 OR p.sku ILIKE $2) ORDER BY p.name",
+                LIST_QUERY
+            ))
+            .bind(filter)
+            .bind(pattern)
+            .fetch_all(&state.pool)
+            .await?
+        }
+        (Some(filter), None) => {
             sqlx::query_as::<_, InventoryRow>(&format!(
                 "{} WHERE p.is_tcg_single = $1 ORDER BY p.name",
                 LIST_QUERY
@@ -88,7 +101,16 @@ async fn do_list(state: AppState, params: ListParams) -> Result<Vec<InventoryRow
             .fetch_all(&state.pool)
             .await?
         }
-        None => {
+        (None, Some(ref pattern)) => {
+            sqlx::query_as::<_, InventoryRow>(&format!(
+                "{} WHERE p.name ILIKE $1 OR p.sku ILIKE $1 ORDER BY p.name",
+                LIST_QUERY
+            ))
+            .bind(pattern)
+            .fetch_all(&state.pool)
+            .await?
+        }
+        (None, None) => {
             sqlx::query_as::<_, InventoryRow>(&format!("{} ORDER BY p.name", LIST_QUERY))
                 .fetch_all(&state.pool)
                 .await?
