@@ -193,12 +193,12 @@ export default function InventoryPage() {
 		<div>
 			{/* Header */}
 			<div className="flex items-center justify-between mb-6">
-				<h1 className="text-[#fabd2f] font-mono text-2xl font-bold">
+				<h1 className="text-zinc-900 text-2xl font-bold">
 					Inventory
 				</h1>
 				<button
 					onClick={openAdd}
-					className="bg-[#fabd2f] text-[#282828] font-mono text-sm font-bold px-4 py-2 hover:bg-[#d79921] transition-colors"
+					className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200"
 				>
 					+ Add Product
 				</button>
@@ -211,18 +211,18 @@ export default function InventoryPage() {
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					placeholder="Search by name or SKU…"
-					className="flex-1 bg-[#1d2021] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-1.5 placeholder-[#665c54] focus:outline-none focus:border-[#fabd2f]"
+					className="flex-1 bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors placeholder:text-zinc-400"
 				/>
 			</div>
-			<div className="flex gap-1 mb-4">
+			<div className="flex gap-1.5 mb-5">
 				{(["all", "sealed", "singles"] as FilterMode[]).map((mode) => (
 					<button
 						key={mode}
 						onClick={() => setFilter(mode)}
-						className={`font-mono text-xs px-3 py-1 border transition-colors ${
+						className={`text-xs px-3 py-1.5 rounded-md border transition-all duration-200 ${
 							filter === mode
-								? "border-[#fabd2f] bg-[#3c3836] text-[#fabd2f]"
-								: "border-[#504945] text-[#928374] hover:text-[#ebdbb2] hover:border-[#665c54]"
+								? "border-blue-600 bg-blue-50 text-blue-600 font-medium"
+								: "border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300"
 						}`}
 					>
 						{mode === "all"
@@ -236,18 +236,18 @@ export default function InventoryPage() {
 
 			{/* Table */}
 			{loading ? (
-				<p className="text-[#928374] font-mono text-sm">Loading…</p>
+				<p className="text-zinc-400 text-sm animate-pulse">Loading…</p>
 			) : error ? (
-				<p className="text-[#fb4934] font-mono text-sm">{error}</p>
+				<p className="text-rose-600 text-sm">{error}</p>
 			) : items.length === 0 ? (
-				<p className="text-[#928374] font-mono text-sm">
+				<p className="text-zinc-400 text-sm">
 					No products found.
 				</p>
 			) : (
-				<div className="border border-[#3c3836] overflow-x-auto">
-					<table className="w-full font-mono text-sm">
+				<div className="bg-white rounded-xl shadow-sm overflow-hidden">
+					<table className="w-full text-sm">
 						<thead>
-							<tr className="border-b border-[#3c3836] text-[#a89984]">
+							<tr className="border-b border-zinc-100">
 								<Th>SKU</Th>
 								<Th>Name</Th>
 								<Th>Type</Th>
@@ -261,29 +261,37 @@ export default function InventoryPage() {
 							{items.map((item) => (
 								<tr
 									key={item.id}
-									className="border-b border-[#3c3836] hover:bg-[#3c3836] transition-colors"
+									className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors"
 								>
-									<Td dim>{item.sku}</Td>
+									<Td dim>
+										<span className="font-mono text-xs tabular-nums">
+											{item.sku}
+										</span>
+									</Td>
 									<Td>{item.name}</Td>
 									<Td>
 										{item.is_tcg_single ? (
-											<span className="text-[#83a598]">
+											<span className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full font-medium">
 												Single
 											</span>
 										) : (
-											<span className="text-[#b8bb26]">
+											<span className="bg-emerald-50 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-medium">
 												Sealed
 											</span>
 										)}
 									</Td>
-									<Td>${parseFloat(item.price).toFixed(2)}</Td>
+									<Td>
+										<span className="font-mono tabular-nums">
+											${parseFloat(item.price).toFixed(2)}
+										</span>
+									</Td>
 									<Td>
 										<span
-											className={
+											className={`font-mono tabular-nums ${
 												item.stock_quantity === 0
-													? "text-[#fb4934]"
-													: "text-[#ebdbb2]"
-											}
+													? "text-rose-600"
+													: "text-zinc-900"
+											}`}
 										>
 											{item.stock_quantity}
 										</span>
@@ -297,17 +305,15 @@ export default function InventoryPage() {
 										<div className="flex gap-3">
 											<button
 												onClick={() => openEdit(item)}
-												className="text-[#83a598] hover:text-[#ebdbb2] transition-colors"
+												className="text-blue-600 hover:text-blue-800 text-xs font-medium transition-colors"
 											>
 												Edit
 											</button>
 											<button
-												onClick={() =>
-													handleDelete(item)
-												}
-												className="text-[#fb4934] hover:text-[#ebdbb2] transition-colors"
+												onClick={() => handleDelete(item)}
+												className="text-rose-500 hover:text-rose-700 text-xs font-medium transition-colors"
 											>
-												Del
+												Delete
 											</button>
 										</div>
 									</Td>
@@ -330,9 +336,7 @@ export default function InventoryPage() {
 								type="text"
 								value={form.sku}
 								disabled={!!editItem}
-								onChange={(e) =>
-									setField("sku", e.target.value)
-								}
+								onChange={(e) => setField("sku", e.target.value)}
 								className={inputClass(!!editItem)}
 							/>
 						</Field>
@@ -341,9 +345,7 @@ export default function InventoryPage() {
 							<input
 								type="text"
 								value={form.name}
-								onChange={(e) =>
-									setField("name", e.target.value)
-								}
+								onChange={(e) => setField("name", e.target.value)}
 								className={inputClass(false)}
 							/>
 						</Field>
@@ -355,9 +357,7 @@ export default function InventoryPage() {
 									step="0.01"
 									min="0"
 									value={form.price}
-									onChange={(e) =>
-										setField("price", e.target.value)
-									}
+									onChange={(e) => setField("price", e.target.value)}
 									className={inputClass(false)}
 								/>
 							</Field>
@@ -366,12 +366,7 @@ export default function InventoryPage() {
 									type="number"
 									min="0"
 									value={form.stock_quantity}
-									onChange={(e) =>
-										setField(
-											"stock_quantity",
-											e.target.value,
-										)
-									}
+									onChange={(e) => setField("stock_quantity", e.target.value)}
 									className={inputClass(false)}
 								/>
 							</Field>
@@ -383,15 +378,10 @@ export default function InventoryPage() {
 								<input
 									type="checkbox"
 									checked={form.is_tcg_single}
-									onChange={(e) =>
-										setField(
-											"is_tcg_single",
-											e.target.checked,
-										)
-									}
-									className="accent-[#fabd2f]"
+									onChange={(e) => setField("is_tcg_single", e.target.checked)}
+									className="accent-blue-600"
 								/>
-								<span className="font-mono text-sm text-[#ebdbb2]">
+								<span className="text-sm text-zinc-700">
 									TCG Single
 								</span>
 							</label>
@@ -399,8 +389,8 @@ export default function InventoryPage() {
 
 						{/* Conditional TCG fields */}
 						{form.is_tcg_single && (
-							<div className="border border-[#504945] p-3 space-y-3">
-								<p className="text-[#a89984] font-mono text-xs uppercase tracking-wider">
+							<div className="border border-zinc-100 rounded-lg p-4 space-y-3 bg-zinc-50">
+								<p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">
 									TCG Details
 								</p>
 
@@ -409,9 +399,7 @@ export default function InventoryPage() {
 										<input
 											type="text"
 											value={form.game}
-											onChange={(e) =>
-												setField("game", e.target.value)
-											}
+											onChange={(e) => setField("game", e.target.value)}
 											placeholder="Magic, Pokémon…"
 											className={inputClass(false)}
 										/>
@@ -420,12 +408,7 @@ export default function InventoryPage() {
 										<input
 											type="text"
 											value={form.set_name}
-											onChange={(e) =>
-												setField(
-													"set_name",
-													e.target.value,
-												)
-											}
+											onChange={(e) => setField("set_name", e.target.value)}
 											className={inputClass(false)}
 										/>
 									</Field>
@@ -436,42 +419,24 @@ export default function InventoryPage() {
 										<select
 											value={form.condition}
 											onChange={(e) =>
-												setField(
-													"condition",
-													e.target.value as CardCondition,
-												)
+												setField("condition", e.target.value as CardCondition)
 											}
 											className={inputClass(false)}
 										>
-											{(
-												[
-													"NM",
-													"LP",
-													"MP",
-													"HP",
-													"DMG",
-												] as CardCondition[]
-											).map((c) => (
-												<option key={c} value={c}>
-													{c}
-												</option>
+											{(["NM", "LP", "MP", "HP", "DMG"] as CardCondition[]).map((c) => (
+												<option key={c} value={c}>{c}</option>
 											))}
 										</select>
 									</Field>
 									<Field label="Foil">
-										<label className="flex items-center gap-2 h-8 cursor-pointer">
+										<label className="flex items-center gap-2 h-9 cursor-pointer">
 											<input
 												type="checkbox"
 												checked={form.foil}
-												onChange={(e) =>
-													setField(
-														"foil",
-														e.target.checked,
-													)
-												}
-												className="accent-[#fabd2f]"
+												onChange={(e) => setField("foil", e.target.checked)}
+												className="accent-blue-600"
 											/>
-											<span className="text-sm text-[#ebdbb2]">
+											<span className="text-sm text-zinc-700">
 												Yes
 											</span>
 										</label>
@@ -481,22 +446,20 @@ export default function InventoryPage() {
 						)}
 
 						{formError && (
-							<p className="text-[#fb4934] font-mono text-xs">
-								{formError}
-							</p>
+							<p className="text-rose-600 text-xs">{formError}</p>
 						)}
 
 						<div className="flex justify-end gap-3 pt-2">
 							<button
 								onClick={closeModal}
-								className="font-mono text-sm text-[#928374] hover:text-[#ebdbb2] transition-colors"
+								className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
 							>
 								Cancel
 							</button>
 							<button
 								onClick={handleSave}
 								disabled={saving}
-								className="bg-[#fabd2f] text-[#282828] font-mono text-sm font-bold px-4 py-2 hover:bg-[#d79921] transition-colors disabled:opacity-50"
+								className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200 disabled:opacity-50"
 							>
 								{saving ? "Saving…" : "Save"}
 							</button>
@@ -512,7 +475,7 @@ export default function InventoryPage() {
 
 function Th({ children }: { children?: React.ReactNode }) {
 	return (
-		<th className="text-left px-4 py-2 font-normal text-xs uppercase tracking-wider">
+		<th className="text-left px-4 py-3 font-medium text-xs uppercase tracking-wider text-zinc-400">
 			{children}
 		</th>
 	);
@@ -526,9 +489,7 @@ function Td({
 	dim?: boolean;
 }) {
 	return (
-		<td
-			className={`px-4 py-3 ${dim ? "text-[#928374]" : "text-[#ebdbb2]"}`}
-		>
+		<td className={`px-4 py-3 ${dim ? "text-zinc-400" : "text-zinc-900"}`}>
 			{children}
 		</td>
 	);
@@ -543,7 +504,7 @@ function Field({
 }) {
 	return (
 		<div>
-			<label className="block text-[#a89984] font-mono text-xs uppercase tracking-wider mb-1">
+			<label className="block text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1.5">
 				{label}
 			</label>
 			{children}
@@ -562,19 +523,19 @@ function Modal({
 }) {
 	return (
 		<div
-			className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+			className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
 			onClick={(e) => {
 				if (e.target === e.currentTarget) onClose();
 			}}
 		>
-			<div className="bg-[#282828] border border-[#3c3836] w-full max-w-lg max-h-[90vh] overflow-y-auto">
-				<div className="flex items-center justify-between px-5 py-4 border-b border-[#3c3836]">
-					<h2 className="text-[#fabd2f] font-mono font-bold">
+			<div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+				<div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+					<h2 className="text-zinc-900 font-semibold">
 						{title}
 					</h2>
 					<button
 						onClick={onClose}
-						className="text-[#928374] hover:text-[#ebdbb2] font-mono"
+						className="text-zinc-400 hover:text-zinc-600 transition-colors"
 					>
 						✕
 					</button>
@@ -586,7 +547,8 @@ function Modal({
 }
 
 function inputClass(disabled: boolean) {
-	return `w-full bg-[#1d2021] border ${
-		disabled ? "border-[#3c3836] text-[#928374]" : "border-[#504945] text-[#ebdbb2]"
-	} font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#fabd2f] transition-colors`;
+	if (disabled) {
+		return "w-full bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-400 text-sm px-3 py-2 cursor-not-allowed";
+	}
+	return "w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors";
 }

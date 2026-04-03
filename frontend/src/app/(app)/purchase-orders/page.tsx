@@ -31,10 +31,10 @@ interface PoItem {
 
 // ── Status display ────────────────────────────────────────────────────────────
 
-const STATUS_STYLES: Record<PoStatus, string> = {
-	draft: "border-[#928374] text-[#928374]",
-	ordered: "border-[#fabd2f] text-[#fabd2f]",
-	received: "border-[#b8bb26] text-[#b8bb26]",
+const STATUS_BADGE: Record<PoStatus, string> = {
+	draft: "bg-zinc-100 text-zinc-600",
+	ordered: "bg-amber-50 text-amber-700",
+	received: "bg-emerald-50 text-emerald-700",
 };
 
 const NEXT_STATUS: Partial<Record<PoStatus, PoStatus>> = {
@@ -147,9 +147,9 @@ export default function PurchaseOrdersPage() {
 			if (!res.ok) throw new Error();
 			// Clear cached items so they refresh on next expand.
 			setItems((prev) => {
-				const next = { ...prev };
-				delete next[po.id];
-				return next;
+				const updated = { ...prev };
+				delete updated[po.id];
+				return updated;
 			});
 			fetchPos();
 		} catch {
@@ -165,23 +165,23 @@ export default function PurchaseOrdersPage() {
 		distributors.find((d) => d.id === id)?.name ?? id.slice(0, 8) + "…";
 
 	if (loading) {
-		return <p className="text-[#928374] font-mono text-sm">Loading…</p>;
+		return <p className="text-zinc-400 text-sm animate-pulse">Loading…</p>;
 	}
 
 	if (error) {
-		return <p className="text-[#fb4934] font-mono text-sm">{error}</p>;
+		return <p className="text-rose-600 text-sm">{error}</p>;
 	}
 
 	return (
 		<div>
 			{/* Header */}
 			<div className="flex items-center justify-between mb-6">
-				<h1 className="text-[#fabd2f] font-mono text-2xl font-bold">
+				<h1 className="text-zinc-900 text-2xl font-bold">
 					Purchase Orders
 				</h1>
 				<button
 					onClick={() => setCreateOpen(true)}
-					className="bg-[#fabd2f] text-[#282828] font-mono text-sm font-bold px-4 py-2 hover:bg-[#d79921] transition-colors"
+					className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200"
 				>
 					+ New PO
 				</button>
@@ -189,14 +189,12 @@ export default function PurchaseOrdersPage() {
 
 			{/* Table */}
 			{pos.length === 0 ? (
-				<p className="text-[#928374] font-mono text-sm">
-					No purchase orders yet.
-				</p>
+				<p className="text-zinc-400 text-sm">No purchase orders yet.</p>
 			) : (
-				<div className="border border-[#3c3836] overflow-x-auto">
-					<table className="w-full font-mono text-sm">
+				<div className="bg-white rounded-xl shadow-sm overflow-hidden">
+					<table className="w-full text-sm">
 						<thead>
-							<tr className="border-b border-[#3c3836] text-[#a89984]">
+							<tr className="border-b border-zinc-100">
 								<Th>Date</Th>
 								<Th>Distributor</Th>
 								<Th>Status</Th>
@@ -208,144 +206,92 @@ export default function PurchaseOrdersPage() {
 							{pos.map((po) => (
 								<React.Fragment key={po.id}>
 									<tr
-										className="border-b border-[#3c3836] hover:bg-[#3c3836] transition-colors cursor-pointer"
+										className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors cursor-pointer"
 										onClick={() => fetchItems(po.id)}
 									>
 										<Td dim>
-											{new Date(
-												po.created_at,
-											).toLocaleDateString()}
+											{new Date(po.created_at).toLocaleDateString()}
 										</Td>
+										<Td>{distributorName(po.distributor_id)}</Td>
 										<Td>
-											{distributorName(po.distributor_id)}
-										</Td>
-										<Td>
-											<span
-												className={`font-mono text-xs px-1.5 py-0.5 border ${STATUS_STYLES[po.status]}`}
-											>
+											<span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[po.status]}`}>
 												{po.status.toUpperCase()}
 											</span>
 										</Td>
 										<Td>
-											${parseFloat(po.total_cost).toFixed(2)}
+											<span className="font-mono tabular-nums">
+												${parseFloat(po.total_cost).toFixed(2)}
+											</span>
 										</Td>
 										<Td>
 											<div
 												className="flex gap-3"
-												onClick={(e) =>
-													e.stopPropagation()
-												}
+												onClick={(e) => e.stopPropagation()}
 											>
 												{NEXT_STATUS[po.status] && (
 													<button
-														onClick={() =>
-															handleAdvance(po)
-														}
-														disabled={
-															advancing === po.id
-														}
-														className="text-[#83a598] hover:text-[#ebdbb2] transition-colors disabled:opacity-40"
+														onClick={() => handleAdvance(po)}
+														disabled={advancing === po.id}
+														className="text-blue-600 hover:text-blue-800 text-xs font-medium transition-colors disabled:opacity-40"
 													>
-														{advancing === po.id
-															? "…"
-															: NEXT_LABEL[
-																	po.status
-																]}
+														{advancing === po.id ? "…" : NEXT_LABEL[po.status]}
 													</button>
 												)}
 												<button
-													onClick={() =>
-														fetchItems(po.id)
-													}
-													className="text-[#928374] hover:text-[#ebdbb2] transition-colors"
+													onClick={() => fetchItems(po.id)}
+													className="text-zinc-400 hover:text-zinc-700 text-xs transition-colors"
 												>
-													{expandedId === po.id
-														? "▲ Hide"
-														: "▼ Items"}
+													{expandedId === po.id ? "▲ Hide" : "▼ Items"}
 												</button>
 											</div>
 										</Td>
 									</tr>
-									{expandedId === po.id &&
-										items[po.id] && (
-											<tr
-												key={`${po.id}-items`}
-												className="border-b border-[#3c3836] bg-[#1d2021]"
-											>
-												<td colSpan={5} className="px-6 py-3">
-													{items[po.id].length ===
-													0 ? (
-														<p className="text-[#665c54] font-mono text-xs">
-															No items on this
-															PO.
-														</p>
-													) : (
-														<table className="w-full font-mono text-xs">
-															<thead>
-																<tr className="text-[#a89984]">
-																	<th className="text-left pb-1">
-																		Product
-																		ID
-																	</th>
-																	<th className="text-right pb-1">
-																		Qty
-																		Ordered
-																	</th>
-																	<th className="text-right pb-1">
-																		Qty
-																		Received
-																	</th>
-																	<th className="text-right pb-1">
-																		Unit
-																		Cost
-																	</th>
+									{expandedId === po.id && items[po.id] && (
+										<tr
+											key={`${po.id}-items`}
+											className="border-b border-zinc-100 bg-zinc-50"
+										>
+											<td colSpan={5} className="px-6 py-4">
+												{items[po.id].length === 0 ? (
+													<p className="text-zinc-400 text-xs">
+														No items on this PO.
+													</p>
+												) : (
+													<table className="w-full text-xs">
+														<thead>
+															<tr className="text-zinc-400">
+																<th className="text-left pb-2 font-medium">Product ID</th>
+																<th className="text-right pb-2 font-medium">Qty Ordered</th>
+																<th className="text-right pb-2 font-medium">Qty Received</th>
+																<th className="text-right pb-2 font-medium">Unit Cost</th>
+															</tr>
+														</thead>
+														<tbody>
+															{items[po.id].map((item) => (
+																<tr
+																	key={item.id}
+																	className="border-t border-zinc-100"
+																>
+																	<td className="py-1.5 text-zinc-500 font-mono">
+																		{item.product_id.slice(0, 8)}…
+																	</td>
+																	<td className="py-1.5 text-right text-zinc-900 font-mono tabular-nums">
+																		{item.ordered_quantity}
+																	</td>
+																	<td className="py-1.5 text-right text-emerald-600 font-mono tabular-nums">
+																		{item.received_quantity}
+																	</td>
+																	<td className="py-1.5 text-right text-zinc-900 font-mono tabular-nums">
+																		${parseFloat(item.unit_cost).toFixed(2)}
+																	</td>
 																</tr>
-															</thead>
-															<tbody>
-																{items[
-																	po.id
-																].map(
-																	(item) => (
-																		<tr
-																			key={
-																				item.id
-																			}
-																			className="border-t border-[#3c3836]"
-																		>
-																			<td className="py-1 text-[#928374]">
-																				{item.product_id.slice(
-																					0,
-																					8,
-																				)}
-																				…
-																			</td>
-																			<td className="py-1 text-right text-[#ebdbb2]">
-																				{
-																					item.ordered_quantity
-																				}
-																			</td>
-																			<td className="py-1 text-right text-[#b8bb26]">
-																				{
-																					item.received_quantity
-																				}
-																			</td>
-																			<td className="py-1 text-right text-[#ebdbb2]">
-																				$
-																				{parseFloat(
-																					item.unit_cost,
-																				).toFixed(
-																					2,
-																				)}
-																			</td>
-																		</tr>
-																	),
-																)}
-															</tbody>
-														</table>
-													)}
-												</td>
-											</tr>
-										)}
+															))}
+														</tbody>
+													</table>
+												)}
+											</td>
+										</tr>
+									)}
 								</React.Fragment>
 							))}
 						</tbody>
@@ -356,39 +302,34 @@ export default function PurchaseOrdersPage() {
 			{/* Create PO modal */}
 			{createOpen && (
 				<div
-					className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+					className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
 					onClick={(e) => {
-						if (e.target === e.currentTarget)
-							setCreateOpen(false);
+						if (e.target === e.currentTarget) setCreateOpen(false);
 					}}
 				>
-					<div className="bg-[#282828] border border-[#3c3836] w-full max-w-sm">
-						<div className="flex items-center justify-between px-5 py-4 border-b border-[#3c3836]">
-							<h2 className="text-[#fabd2f] font-mono font-bold">
+					<div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
+						<div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+							<h2 className="text-zinc-900 font-semibold">
 								New Purchase Order
 							</h2>
 							<button
 								onClick={() => setCreateOpen(false)}
-								className="text-[#928374] hover:text-[#ebdbb2] font-mono"
+								className="text-zinc-400 hover:text-zinc-600 transition-colors"
 							>
 								✕
 							</button>
 						</div>
 						<div className="px-5 py-4 space-y-4">
 							<div>
-								<label className="block text-[#a89984] font-mono text-xs uppercase tracking-wider mb-1">
+								<label className="block text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1.5">
 									Distributor
 								</label>
 								<select
 									value={selectedDistributor}
-									onChange={(e) =>
-										setSelectedDistributor(e.target.value)
-									}
-									className="w-full bg-[#1d2021] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#fabd2f]"
+									onChange={(e) => setSelectedDistributor(e.target.value)}
+									className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
 								>
-									<option value="">
-										Select a distributor…
-									</option>
+									<option value="">Select a distributor…</option>
 									{distributors.map((d) => (
 										<option key={d.id} value={d.id}>
 											{d.name}
@@ -399,16 +340,14 @@ export default function PurchaseOrdersPage() {
 							<div className="flex justify-end gap-3 pt-1">
 								<button
 									onClick={() => setCreateOpen(false)}
-									className="font-mono text-sm text-[#928374] hover:text-[#ebdbb2]"
+									className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
 								>
 									Cancel
 								</button>
 								<button
 									onClick={handleCreate}
-									disabled={
-										!selectedDistributor || creating
-									}
-									className="bg-[#fabd2f] text-[#282828] font-mono text-sm font-bold px-4 py-2 hover:bg-[#d79921] transition-colors disabled:opacity-50"
+									disabled={!selectedDistributor || creating}
+									className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200 disabled:opacity-50"
 								>
 									{creating ? "Creating…" : "Create PO"}
 								</button>
@@ -425,7 +364,7 @@ export default function PurchaseOrdersPage() {
 
 function Th({ children }: { children?: React.ReactNode }) {
 	return (
-		<th className="text-left px-4 py-2 font-normal text-xs uppercase tracking-wider">
+		<th className="text-left px-4 py-3 font-medium text-xs uppercase tracking-wider text-zinc-400">
 			{children}
 		</th>
 	);
@@ -439,7 +378,7 @@ function Td({
 	dim?: boolean;
 }) {
 	return (
-		<td className={`px-4 py-3 ${dim ? "text-[#928374]" : "text-[#ebdbb2]"}`}>
+		<td className={`px-4 py-3 ${dim ? "text-zinc-400" : "text-zinc-900"}`}>
 			{children}
 		</td>
 	);

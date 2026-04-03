@@ -1,1 +1,169 @@
 @import "tailwindcss";
+
+@theme {
+	--font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+	color-scheme: light;
+}
+
+body[data-theme="dark"] {
+	color-scheme: dark;
+	background-color: #0a0f1a;
+	color: #e5edf7;
+}
+
+body[data-theme="dark"] .bg-zinc-50 {
+	background-color: #0f1726 !important;
+}
+
+body[data-theme="dark"] .bg-white {
+	background-color: #162033 !important;
+}
+
+body[data-theme="dark"] .bg-white\/80 {
+	background-color: rgb(22 32 51 / 0.8) !important;
+}
+
+body[data-theme="dark"] .bg-zinc-100 {
+	background-color: #1c2940 !important;
+}
+
+body[data-theme="dark"] .bg-blue-50 {
+	background-color: #11233f !important;
+}
+
+body[data-theme="dark"] .bg-amber-50 {
+	background-color: #33230f !important;
+}
+
+body[data-theme="dark"] .bg-emerald-50 {
+	background-color: #0f2d26 !important;
+}
+
+body[data-theme="dark"] .bg-rose-50 {
+	background-color: #32141a !important;
+}
+
+body[data-theme="dark"] .border-zinc-100,
+body[data-theme="dark"] .border-zinc-200 {
+	border-color: #30415f !important;
+}
+
+body[data-theme="dark"] .border-zinc-300 {
+	border-color: #41567a !important;
+}
+
+body[data-theme="dark"] .border-blue-300 {
+	border-color: #4f85d8 !important;
+}
+
+body[data-theme="dark"] .border-blue-500,
+body[data-theme="dark"] .border-blue-600 {
+	border-color: #5b8def !important;
+}
+
+body[data-theme="dark"] .border-emerald-200 {
+	border-color: #2f8a76 !important;
+}
+
+body[data-theme="dark"] .border-rose-200 {
+	border-color: #a74b62 !important;
+}
+
+body[data-theme="dark"] .text-zinc-900 {
+	color: #f3f7fc !important;
+}
+
+body[data-theme="dark"] .text-zinc-800 {
+	color: #dce5f2 !important;
+}
+
+body[data-theme="dark"] .text-zinc-700 {
+	color: #c3d0e3 !important;
+}
+
+body[data-theme="dark"] .text-zinc-600,
+body[data-theme="dark"] .text-zinc-500 {
+	color: #9aabc5 !important;
+}
+
+body[data-theme="dark"] .text-zinc-400,
+body[data-theme="dark"] .text-zinc-300 {
+	color: #7f93b2 !important;
+}
+
+body[data-theme="dark"] .text-blue-600,
+body[data-theme="dark"] .text-blue-700,
+body[data-theme="dark"] .text-blue-800 {
+	color: #8ab4ff !important;
+}
+
+body[data-theme="dark"] .text-emerald-600,
+body[data-theme="dark"] .text-emerald-700 {
+	color: #63d4b5 !important;
+}
+
+body[data-theme="dark"] .text-amber-500,
+body[data-theme="dark"] .text-amber-700 {
+	color: #f5bf67 !important;
+}
+
+body[data-theme="dark"] .text-rose-500,
+body[data-theme="dark"] .text-rose-600,
+body[data-theme="dark"] .text-rose-700 {
+	color: #ff8fa3 !important;
+}
+
+body[data-theme="dark"] .bg-blue-600 {
+	background-color: #315ea8 !important;
+}
+
+body[data-theme="dark"] .bg-blue-700 {
+	background-color: #284c87 !important;
+}
+
+body[data-theme="dark"] .bg-emerald-600 {
+	background-color: #157a63 !important;
+}
+
+body[data-theme="dark"] .bg-emerald-700 {
+	background-color: #126652 !important;
+}
+
+body[data-theme="dark"] .hover\:bg-zinc-50:hover,
+body[data-theme="dark"] .hover\:bg-zinc-100:hover {
+	background-color: #1c2940 !important;
+}
+
+body[data-theme="dark"] .hover\:bg-blue-700:hover {
+	background-color: #3b71c7 !important;
+}
+
+body[data-theme="dark"] .hover\:bg-emerald-700:hover {
+	background-color: #1a8e73 !important;
+}
+
+body[data-theme="dark"] .hover\:text-zinc-900:hover,
+body[data-theme="dark"] .hover\:text-zinc-600:hover {
+	color: #f3f7fc !important;
+}
+
+body[data-theme="dark"] .hover\:text-blue-800:hover {
+	color: #a8c7ff !important;
+}
+
+body[data-theme="dark"] .hover\:text-rose-600:hover,
+body[data-theme="dark"] .hover\:text-rose-700:hover,
+body[data-theme="dark"] .hover\:text-rose-500:hover {
+	color: #ffadbb !important;
+}
+
+body[data-theme="dark"] .hover\:border-zinc-300:hover {
+	border-color: #4a638f !important;
+}
+
+body[data-theme="dark"] .hover\:border-blue-300:hover {
+	border-color: #76a8ff !important;
+}

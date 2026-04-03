@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ChevronRight } from "lucide-react";
+
+import ThemeToggle from "@/components/ThemeToggle";
 
 const ROUTE_LABELS: Record<string, string> = {
 	"/dashboard": "Dashboard",
@@ -39,19 +42,25 @@ export default function Header() {
 	}
 
 	return (
-		<header className="h-12 flex items-center justify-between px-6 border-b border-[#3c3836] bg-[#282828] shrink-0">
-			<span className="text-[#a89984] font-mono text-sm">
-				<span className="text-[#665c54]">Nisse</span>
-				<span className="text-[#504945] mx-1">/</span>
-				<span className="text-[#ebdbb2]">{label}</span>
-			</span>
+		<header className="h-12 flex items-center justify-between px-6 border-b border-zinc-200 bg-white/80 backdrop-blur shrink-0">
+			<div className="flex items-center gap-1.5 text-sm">
+				<span className="text-zinc-400">Nisse</span>
+				<ChevronRight className="w-3.5 h-3.5 text-zinc-300" />
+				<span className="text-zinc-900 font-medium">{label}</span>
+			</div>
 			<div className="flex items-center gap-3">
-				<Link href="/profile" className="text-[#665c54] hover:text-[#ebdbb2] font-mono text-xs transition-colors">{username}</Link>
+				<ThemeToggle />
+				<Link
+					href="/profile"
+					className="text-zinc-500 hover:text-zinc-900 text-sm transition-colors"
+				>
+					{username}
+				</Link>
 				<button
 					onClick={handleLogout}
-					className="text-[#928374] hover:text-[#fb4934] font-mono text-xs transition-colors"
+					className="text-zinc-400 hover:text-rose-600 text-sm transition-colors"
 				>
-					logout
+					Sign out
 				</button>
 			</div>
 		</header>

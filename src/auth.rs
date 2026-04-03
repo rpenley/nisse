@@ -66,6 +66,7 @@ pub struct CurrentUser {
     pub id: Uuid,
     pub username: String,
     pub role: UserRole,
+    pub theme_preference: String,
 }
 
 #[async_trait]
@@ -96,7 +97,7 @@ where
             })?;
 
         let user = sqlx::query_as::<_, crate::models::user::User>(
-            "SELECT id, username, password_hash, role FROM users WHERE id = $1",
+            "SELECT id, username, password_hash, role, theme_preference FROM users WHERE id = $1",
         )
         .bind(user_id)
         .fetch_one(&app_state.pool)
@@ -112,6 +113,7 @@ where
             id: user.id,
             username: user.username,
             role: user.role,
+            theme_preference: user.theme_preference,
         })
     }
 }

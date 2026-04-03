@@ -142,44 +142,44 @@ export default function UsersPage() {
 
 	// ── Render ────────────────────────────────────────────────────────────────
 
-	if (loading) return <p className="text-[#928374] font-mono text-sm">Loading…</p>;
-	if (error) return <p className="text-[#fb4934] font-mono text-sm">{error}</p>;
+	if (loading) return <p className="text-zinc-400 text-sm animate-pulse">Loading…</p>;
+	if (error) return <p className="text-rose-600 text-sm">{error}</p>;
 
 	return (
 		<div>
 			<div className="flex items-center justify-between mb-6">
-				<h1 className="text-[#fabd2f] font-mono text-2xl font-bold">Users</h1>
+				<h1 className="text-zinc-900 text-2xl font-bold">Users</h1>
 				<button
 					onClick={openCreate}
-					className="bg-[#fabd2f] text-[#282828] font-mono text-sm font-bold px-4 py-2 hover:bg-[#d79921] transition-colors"
+					className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200"
 				>
 					+ New User
 				</button>
 			</div>
 
-			<div className="border border-[#3c3836] overflow-x-auto">
-				<table className="w-full font-mono text-sm">
+			<div className="bg-white rounded-xl shadow-sm overflow-hidden">
+				<table className="w-full text-sm">
 					<thead>
-						<tr className="border-b border-[#3c3836] text-[#a89984]">
-							<th className="text-left px-4 py-2 font-normal text-xs uppercase tracking-wider">Username</th>
-							<th className="text-left px-4 py-2 font-normal text-xs uppercase tracking-wider">Role</th>
-							<th className="px-4 py-2" />
+						<tr className="border-b border-zinc-100">
+							<th className="text-left px-4 py-3 font-medium text-xs uppercase tracking-wider text-zinc-400">Username</th>
+							<th className="text-left px-4 py-3 font-medium text-xs uppercase tracking-wider text-zinc-400">Role</th>
+							<th className="px-4 py-3" />
 						</tr>
 					</thead>
 					<tbody>
 						{users.map((user) => (
-							<tr key={user.id} className="border-b border-[#3c3836] hover:bg-[#3c3836] transition-colors">
-								<td className="px-4 py-3 text-[#ebdbb2]">
+							<tr key={user.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
+								<td className="px-4 py-3 text-zinc-900">
 									{user.username}
 									{user.id === currentUserId && (
-										<span className="ml-2 text-[#928374] text-xs">(you)</span>
+										<span className="ml-2 text-zinc-400 text-xs">(you)</span>
 									)}
 								</td>
 								<td className="px-4 py-3">
-									<span className={`font-mono text-xs px-1.5 py-0.5 border ${
+									<span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
 										user.role === "admin"
-											? "border-[#fabd2f] text-[#fabd2f]"
-											: "border-[#83a598] text-[#83a598]"
+											? "bg-amber-50 text-amber-700"
+											: "bg-blue-50 text-blue-700"
 									}`}>
 										{user.role.toUpperCase()}
 									</span>
@@ -188,16 +188,16 @@ export default function UsersPage() {
 									<div className="flex gap-3 justify-end">
 										<button
 											onClick={() => openEdit(user)}
-											className="text-[#83a598] hover:text-[#ebdbb2] transition-colors text-xs"
+											className="text-blue-600 hover:text-blue-800 text-xs font-medium transition-colors"
 										>
 											Edit
 										</button>
 										{user.id !== currentUserId && (
 											<button
 												onClick={() => handleDelete(user)}
-												className="text-[#fb4934] hover:text-[#ebdbb2] transition-colors text-xs"
+												className="text-rose-500 hover:text-rose-700 text-xs font-medium transition-colors"
 											>
-												Del
+												Delete
 											</button>
 										)}
 									</div>
@@ -211,52 +211,52 @@ export default function UsersPage() {
 			{/* Create / Edit modal */}
 			{modalOpen && (
 				<div
-					className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+					className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
 					onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
 				>
-					<div className="bg-[#282828] border border-[#3c3836] w-full max-w-sm">
-						<div className="flex items-center justify-between px-5 py-4 border-b border-[#3c3836]">
-							<h2 className="text-[#fabd2f] font-mono font-bold">
+					<div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
+						<div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+							<h2 className="text-zinc-900 font-semibold">
 								{editUser ? "Edit User" : "New User"}
 							</h2>
-							<button onClick={closeModal} className="text-[#928374] hover:text-[#ebdbb2] font-mono">✕</button>
+							<button onClick={closeModal} className="text-zinc-400 hover:text-zinc-600 transition-colors">✕</button>
 						</div>
 						<div className="px-5 py-4 space-y-4">
 							{/* Username */}
 							<div>
-								<label className="block text-[#a89984] font-mono text-xs uppercase tracking-wider mb-1">
+								<label className="block text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1.5">
 									Username
 								</label>
 								<input
 									type="text"
 									value={formUsername}
 									onChange={(e) => setFormUsername(e.target.value)}
-									className="w-full bg-[#1d2021] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#fabd2f]"
+									className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
 								/>
 							</div>
 
 							{/* Password */}
 							<div>
-								<label className="block text-[#a89984] font-mono text-xs uppercase tracking-wider mb-1">
+								<label className="block text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1.5">
 									{editUser ? "New Password (blank = keep current)" : "Password"}
 								</label>
 								<input
 									type="password"
 									value={formPassword}
 									onChange={(e) => setFormPassword(e.target.value)}
-									className="w-full bg-[#1d2021] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#fabd2f]"
+									className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
 								/>
 							</div>
 
 							{/* Role */}
 							<div>
-								<label className="block text-[#a89984] font-mono text-xs uppercase tracking-wider mb-1">
+								<label className="block text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1.5">
 									Role
 								</label>
 								<select
 									value={formRole}
 									onChange={(e) => setFormRole(e.target.value as Role)}
-									className="w-full bg-[#1d2021] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#fabd2f]"
+									className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
 								>
 									<option value="cashier">Cashier</option>
 									<option value="admin">Admin</option>
@@ -264,20 +264,20 @@ export default function UsersPage() {
 							</div>
 
 							{formError && (
-								<p className="text-[#fb4934] font-mono text-xs">{formError}</p>
+								<p className="text-rose-600 text-xs">{formError}</p>
 							)}
 
 							<div className="flex justify-end gap-3 pt-1">
 								<button
 									onClick={closeModal}
-									className="font-mono text-sm text-[#928374] hover:text-[#ebdbb2]"
+									className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
 								>
 									Cancel
 								</button>
 								<button
 									onClick={handleSave}
 									disabled={saving}
-									className="bg-[#fabd2f] text-[#282828] font-mono text-sm font-bold px-4 py-2 hover:bg-[#d79921] transition-colors disabled:opacity-50"
+									className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200 disabled:opacity-50"
 								>
 									{saving ? "Saving…" : editUser ? "Save" : "Create"}
 								</button>

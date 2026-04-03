@@ -25,7 +25,7 @@ pub async fn login(
     Json(payload): Json<LoginRequest>,
 ) -> impl IntoResponse {
     let result = sqlx::query_as::<_, User>(
-        "SELECT id, username, password_hash, role FROM users WHERE username = $1",
+        "SELECT id, username, password_hash, role, theme_preference FROM users WHERE username = $1",
     )
     .bind(&payload.username)
     .fetch_optional(&state.pool)
@@ -73,6 +73,7 @@ pub async fn login(
             "id": user.id,
             "username": user.username,
             "role": user.role,
+            "theme_preference": user.theme_preference,
         })),
     )
         .into_response()
@@ -99,5 +100,6 @@ pub async fn me(current_user: CurrentUser) -> impl IntoResponse {
         "id": current_user.id,
         "username": current_user.username,
         "role": current_user.role,
+        "theme_preference": current_user.theme_preference,
     }))
 }

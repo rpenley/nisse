@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+
+import { ThemeProvider, type ThemePreference } from "@/components/ThemeProvider";
+import { getCurrentUser } from "@/lib/auth";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,15 +10,20 @@ export const metadata: Metadata = {
 	description: "Point of Sale & ERP for game shops",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	const user = await getCurrentUser();
+	const theme = (user?.theme_preference ?? "light") as ThemePreference;
+
 	return (
 		<html lang="en">
-			<body className="bg-[#282828] text-[#ebdbb2] font-mono">
-				{children}
+			<body data-theme={theme} className="font-sans bg-zinc-50 text-zinc-900">
+				<ThemeProvider initialTheme={theme}>
+					{children}
+				</ThemeProvider>
 			</body>
 		</html>
 	);

@@ -19,6 +19,7 @@ use crate::state::AppState;
 pub struct UpdateMeRequest {
     pub username: Option<String>,
     pub password: Option<String>,
+    pub theme_preference: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -26,6 +27,7 @@ pub struct CreateUserRequest {
     pub username: String,
     pub password: String,
     pub role: UserRole,
+    pub theme_preference: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -33,6 +35,18 @@ pub struct UpdateUserRequest {
     pub username: Option<String>,
     pub password: Option<String>,
     pub role: Option<UserRole>,
+    pub theme_preference: Option<String>,
+}
+
+fn normalized_theme_preference(theme: Option<&str>) -> Result<Option<&str>, AppError> {
+    match theme.map(str::trim) {
+        Some("light") => Ok(Some("light")),
+        Some("dark") => Ok(Some("dark")),
+        Some(_) => Err(AppError::BadRequest(
+            "Theme preference must be 'light' or 'dark'".into(),
+        )),
+        None => Ok(None),
+    }
 }
 
 // ── PATCH /api/me — self-edit ─────────────────────────────────────────────────
@@ -42,9 +56,15 @@ pub async fn update_me(
     State(state): State<AppState>,
     Json(payload): Json<UpdateMeRequest>,
 ) -> impl IntoResponse {
-    if payload.username.is_none() && payload.password.is_none() {
+    if payload.username.is_none() && payload.password.is_none() && payload.theme_preference.is_none()
+    {
         return AppError::BadRequest("Nothing to update".into()).into_response();
     }
+
+    let theme_preference = match normalized_theme_preference(payload.theme_preference.as_deref()) {
+        Ok(value) => value,
+        Err(err) => return err.into_response(),
+    };
 
     let new_hash = if let Some(ref password) = payload.password {
         if password.trim().is_empty() {
@@ -61,13 +81,15 @@ pub async fn update_me(
     let result = sqlx::query_as::<_, User>(
         "UPDATE users SET
              username      = COALESCE($2, username),
-             password_hash = COALESCE($3, password_hash)
+             password_hash = COALESCE($3, password_hash),
+             theme_preference = COALESCE($4, theme_preference)
          WHERE id = $1
          RETURNING *",
     )
     .bind(current_user.id)
     .bind(payload.username.as_deref())
     .bind(new_hash.as_deref())
+    .bind(theme_preference)
     .fetch_one(&state.pool)
     .await;
 
@@ -76,6 +98,7 @@ pub async fn update_me(
             "id": user.id,
             "username": user.username,
             "role": user.role,
+            "theme_preference": user.theme_preference,
         }))
         .into_response(),
         Err(e) if e.to_string().contains("23505") => {
@@ -131,19 +154,32 @@ pub async fn create(
         Err(_) => return AppError::BadRequest("Password hashing failed".into()).into_response(),
     };
 
+    let theme_preference = match normalized_theme_preference(payload.theme_preference.as_deref()) {
+        Ok(value) => value.unwrap_or("light"),
+        Err(err) => return err.into_response(),
+    };
+
     let result = sqlx::query_as::<_, User>(
-        "INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3) RETURNING *",
+        "INSERT INTO users (username, password_hash, role, theme_preference)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *",
     )
     .bind(payload.username.trim())
     .bind(&hash)
     .bind(&payload.role)
+    .bind(theme_preference)
     .fetch_one(&state.pool)
     .await;
 
     match result {
         Ok(user) => (
             StatusCode::CREATED,
-            Json(json!({ "id": user.id, "username": user.username, "role": user.role })),
+            Json(json!({
+                "id": user.id,
+                "username": user.username,
+                "role": user.role,
+                "theme_preference": user.theme_preference,
+            })),
         )
             .into_response(),
         Err(e) if e.to_string().contains("23505") => {
@@ -165,9 +201,18 @@ pub async fn update(
         return AppError::BadRequest("Admin only".into()).into_response();
     }
 
-    if payload.username.is_none() && payload.password.is_none() && payload.role.is_none() {
+    if payload.username.is_none()
+        && payload.password.is_none()
+        && payload.role.is_none()
+        && payload.theme_preference.is_none()
+    {
         return AppError::BadRequest("Nothing to update".into()).into_response();
     }
+
+    let theme_preference = match normalized_theme_preference(payload.theme_preference.as_deref()) {
+        Ok(value) => value,
+        Err(err) => return err.into_response(),
+    };
 
     let new_hash = if let Some(ref password) = payload.password {
         if password.trim().is_empty() {
@@ -187,13 +232,15 @@ pub async fn update(
             "UPDATE users SET
                  username      = COALESCE($1, username),
                  password_hash = COALESCE($2, password_hash),
-                 role          = $3
-             WHERE id = $4
+                 role          = $3,
+                 theme_preference = COALESCE($4, theme_preference)
+             WHERE id = $5
              RETURNING *",
         )
         .bind(payload.username.as_deref())
         .bind(new_hash.as_deref())
         .bind(role)
+        .bind(theme_preference)
         .bind(id)
         .fetch_optional(&state.pool)
         .await
@@ -201,12 +248,14 @@ pub async fn update(
         sqlx::query_as::<_, User>(
             "UPDATE users SET
                  username      = COALESCE($1, username),
-                 password_hash = COALESCE($2, password_hash)
-             WHERE id = $3
+                 password_hash = COALESCE($2, password_hash),
+                 theme_preference = COALESCE($3, theme_preference)
+             WHERE id = $4
              RETURNING *",
         )
         .bind(payload.username.as_deref())
         .bind(new_hash.as_deref())
+        .bind(theme_preference)
         .bind(id)
         .fetch_optional(&state.pool)
         .await
@@ -217,6 +266,7 @@ pub async fn update(
             "id": user.id,
             "username": user.username,
             "role": user.role,
+            "theme_preference": user.theme_preference,
         }))
         .into_response(),
         Ok(None) => AppError::NotFound("User not found".into()).into_response(),

@@ -3,19 +3,36 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+	LayoutDashboard,
+	ShoppingCart,
+	Package,
+	ClipboardList,
+	Users,
+	Calendar,
+	UserCog,
+	Shield,
+	type LucideIcon,
+} from "lucide-react";
 
-const NAV_ITEMS = [
-	{ href: "/dashboard", label: "Dashboard" },
-	{ href: "/pos", label: "POS" },
-	{ href: "/inventory", label: "Inventory" },
-	{ href: "/purchase-orders", label: "Purchase Orders" },
-	{ href: "/customers", label: "Customers" },
-	{ href: "/calendar", label: "Calendar" },
+interface NavItem {
+	href: string;
+	label: string;
+	icon: LucideIcon;
+}
+
+const NAV_ITEMS: NavItem[] = [
+	{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+	{ href: "/pos", label: "Point of Sale", icon: ShoppingCart },
+	{ href: "/inventory", label: "Inventory", icon: Package },
+	{ href: "/purchase-orders", label: "Purchase Orders", icon: ClipboardList },
+	{ href: "/customers", label: "Customers", icon: Users },
+	{ href: "/calendar", label: "Calendar", icon: Calendar },
 ];
 
-const ADMIN_NAV_ITEMS = [
-	{ href: "/users", label: "Users" },
-	{ href: "/roles", label: "Roles" },
+const ADMIN_NAV_ITEMS: NavItem[] = [
+	{ href: "/users", label: "Users", icon: UserCog },
+	{ href: "/roles", label: "Roles", icon: Shield },
 ];
 
 export default function Sidebar() {
@@ -29,36 +46,39 @@ export default function Sidebar() {
 			.catch(() => {});
 	}, []);
 
-	function navLink({ href, label }: { href: string; label: string }) {
+	function navLink({ href, label, icon: Icon }: NavItem) {
 		const active = pathname === href || pathname.startsWith(href + "/");
 		return (
 			<Link
 				key={href}
 				href={href}
-				className={`block px-3 py-2 rounded font-mono text-sm transition-colors ${
+				className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
 					active
-						? "bg-[#3c3836] text-[#ebdbb2]"
-						: "text-[#928374] hover:bg-[#3c3836] hover:text-[#ebdbb2]"
+						? "bg-blue-50 text-blue-600"
+						: "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
 				}`}
 			>
+				<Icon className="w-4 h-4 shrink-0" strokeWidth={1.5} />
 				{label}
 			</Link>
 		);
 	}
 
 	return (
-		<aside className="w-56 min-h-screen bg-[#282828] border-r border-[#3c3836] flex flex-col">
-			<div className="px-4 py-5 border-b border-[#3c3836]">
-				<span className="text-[#fabd2f] font-mono text-lg font-bold tracking-wide">
+		<aside className="w-60 min-h-screen bg-white border-r border-zinc-200 flex flex-col">
+			<div className="px-4 py-5 border-b border-zinc-200">
+				<span className="text-blue-600 text-lg font-bold tracking-tight">
 					Nisse
 				</span>
 			</div>
-			<nav className="flex-1 px-2 py-4 space-y-1">
+			<nav className="flex-1 px-3 py-4 space-y-0.5">
 				{NAV_ITEMS.map(navLink)}
 				{isAdmin && (
 					<>
-						<div className="px-3 pt-4 pb-1">
-							<span className="text-[#665c54] font-mono text-xs uppercase tracking-wider">Admin</span>
+						<div className="px-3 pt-5 pb-1.5">
+							<span className="text-zinc-400 text-xs font-medium uppercase tracking-wider">
+								Admin
+							</span>
 						</div>
 						{ADMIN_NAV_ITEMS.map(navLink)}
 					</>

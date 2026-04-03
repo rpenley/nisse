@@ -1,10 +1,7 @@
 "use client";
-
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
@@ -26,7 +23,7 @@ export default function LoginPage() {
 			});
 
 			if (response.ok) {
-				router.replace("/dashboard");
+				window.location.assign("/dashboard");
 			} else {
 				const data = await response.json();
 				setError(data.error ?? "Login failed");
@@ -40,11 +37,11 @@ export default function LoginPage() {
 
 	return (
 		<div className="w-full max-w-sm">
-			<div className="border border-[#3c3836] bg-[#1d2021] p-8">
-				<h1 className="text-[#fabd2f] font-mono text-2xl font-bold mb-1">
+			<div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-8">
+				<h1 className="text-zinc-900 text-2xl font-bold mb-1">
 					Nisse
 				</h1>
-				<p className="text-[#928374] font-mono text-sm mb-8">
+				<p className="text-zinc-500 text-sm mb-8">
 					Point of Sale &amp; ERP
 				</p>
 
@@ -52,7 +49,7 @@ export default function LoginPage() {
 					<div>
 						<label
 							htmlFor="username"
-							className="block text-[#a89984] font-mono text-xs uppercase tracking-wider mb-1"
+							className="block text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1.5"
 						>
 							Username
 						</label>
@@ -62,14 +59,14 @@ export default function LoginPage() {
 							type="text"
 							required
 							autoComplete="username"
-							className="w-full bg-[#282828] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#fabd2f] transition-colors"
+							className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
 						/>
 					</div>
 
 					<div>
 						<label
 							htmlFor="password"
-							className="block text-[#a89984] font-mono text-xs uppercase tracking-wider mb-1"
+							className="block text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1.5"
 						>
 							Password
 						</label>
@@ -79,18 +76,18 @@ export default function LoginPage() {
 							type="password"
 							required
 							autoComplete="current-password"
-							className="w-full bg-[#282828] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#fabd2f] transition-colors"
+							className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
 						/>
 					</div>
 
 					{error && (
-						<p className="text-[#fb4934] font-mono text-xs">{error}</p>
+						<p className="text-rose-600 text-xs">{error}</p>
 					)}
 
 					<button
 						type="submit"
 						disabled={loading}
-						className="w-full bg-[#fabd2f] text-[#282828] font-mono text-sm font-bold py-2 px-4 hover:bg-[#d79921] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						className="w-full bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{loading ? "Signing in…" : "Sign in"}
 					</button>

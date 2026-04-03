@@ -35,35 +35,26 @@ const CART_STORAGE_KEY = "nisse_pos_cart";
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function PosPage() {
-	// Products catalog
 	const [products, setProducts] = useState<Product[]>([]);
 	const [catalogLoading, setCatalogLoading] = useState(true);
 	const [catalogError, setCatalogError] = useState<string | null>(null);
 
-	// Search / SKU scanner
 	const [search, setSearch] = useState("");
 	const [skuInput, setSkuInput] = useState("");
 	const skuRef = useRef<HTMLInputElement>(null);
 
-	// Cart — persisted to localStorage
 	const [cart, setCart] = useState<CartItem[]>([]);
 	const [cartLoaded, setCartLoaded] = useState(false);
 
-	// Customer
 	const [customerSearch, setCustomerSearch] = useState("");
 	const [customerResults, setCustomerResults] = useState<Customer[]>([]);
-	const [attachedCustomer, setAttachedCustomer] =
-		useState<Customer | null>(null);
+	const [attachedCustomer, setAttachedCustomer] = useState<Customer | null>(null);
 
-	// Payment
 	const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
 	const [creditAmount, setCreditAmount] = useState("");
 
-	// Checkout state
 	const [checkoutLoading, setCheckoutLoading] = useState(false);
-	const [toast, setToast] = useState<{ message: string; ok: boolean } | null>(
-		null,
-	);
+	const [toast, setToast] = useState<{ message: string; ok: boolean } | null>(null);
 
 	// ── Load cart from localStorage on mount ─────────────────────────────────
 
@@ -187,9 +178,7 @@ export default function PosPage() {
 	function handleSkuScan(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key !== "Enter") return;
 		const sku = skuInput.trim().toUpperCase();
-		const match = products.find(
-			(p) => p.sku.toUpperCase() === sku,
-		);
+		const match = products.find((p) => p.sku.toUpperCase() === sku);
 		if (match) {
 			addToCart(match);
 			setSkuInput("");
@@ -205,32 +194,21 @@ export default function PosPage() {
 		if (cart.length === 0) return;
 
 		if (
-			(paymentMethod === "store_credit" ||
-				paymentMethod === "split") &&
+			(paymentMethod === "store_credit" || paymentMethod === "split") &&
 			!attachedCustomer
 		) {
-			setToast({
-				message: "Attach a customer to use store credit",
-				ok: false,
-			});
+			setToast({ message: "Attach a customer to use store credit", ok: false });
 			return;
 		}
 
 		if (paymentMethod === "split") {
 			const credit = parseFloat(creditAmount);
 			if (isNaN(credit) || credit <= 0) {
-				setToast({
-					message: "Enter a valid store credit amount",
-					ok: false,
-				});
+				setToast({ message: "Enter a valid store credit amount", ok: false });
 				return;
 			}
 			if (credit >= cartTotal) {
-				setToast({
-					message:
-						"For full credit payment, use Store Credit mode",
-					ok: false,
-				});
+				setToast({ message: "For full credit payment, use Store Credit mode", ok: false });
 				return;
 			}
 		}
@@ -245,13 +223,8 @@ export default function PosPage() {
 			})),
 		};
 
-		if (attachedCustomer) {
-			body.customer_id = attachedCustomer.id;
-		}
-
-		if (paymentMethod === "split") {
-			body.store_credit_amount = parseFloat(creditAmount);
-		}
+		if (attachedCustomer) body.customer_id = attachedCustomer.id;
+		if (paymentMethod === "split") body.store_credit_amount = parseFloat(creditAmount);
 
 		try {
 			const response = await fetch("/api/sales/checkout", {
@@ -276,19 +249,10 @@ export default function PosPage() {
 				setPaymentMethod("cash");
 				fetchProducts();
 
-				// Refresh the attached customer's balance so it's current.
 				if (attachedCustomer && creditUsed > 0) {
-					const newBalance =
-						parseFloat(attachedCustomer.store_credit_balance) -
-						creditUsed;
+					const newBalance = parseFloat(attachedCustomer.store_credit_balance) - creditUsed;
 					setAttachedCustomer((c) =>
-						c
-							? {
-									...c,
-									store_credit_balance:
-										newBalance.toFixed(2),
-								}
-							: null,
+						c ? { ...c, store_credit_balance: newBalance.toFixed(2) } : null,
 					);
 				}
 
@@ -297,10 +261,7 @@ export default function PosPage() {
 					ok: true,
 				});
 			} else {
-				setToast({
-					message: data.error ?? "Checkout failed",
-					ok: false,
-				});
+				setToast({ message: data.error ?? "Checkout failed", ok: false });
 			}
 		} catch {
 			setToast({ message: "Could not reach server", ok: false });
@@ -342,9 +303,9 @@ export default function PosPage() {
 	return (
 		<div className="flex h-[calc(100vh-48px)] gap-0 -m-6">
 			{/* ── Left panel: product catalog ─────────────────────────────── */}
-			<div className="flex flex-col flex-1 border-r border-[#3c3836] overflow-hidden">
+			<div className="flex flex-col flex-1 border-r border-zinc-200 overflow-hidden bg-white">
 				{/* SKU scanner */}
-				<div className="px-4 py-3 border-b border-[#3c3836] bg-[#1d2021]">
+				<div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50">
 					<input
 						ref={skuRef}
 						type="text"
@@ -352,35 +313,29 @@ export default function PosPage() {
 						onChange={(e) => setSkuInput(e.target.value)}
 						onKeyDown={handleSkuScan}
 						placeholder="Scan SKU and press Enter…"
-						className="w-full bg-[#282828] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#b8bb26] transition-colors placeholder:text-[#665c54]"
+						className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors placeholder:text-zinc-400 font-mono"
 					/>
 				</div>
 
 				{/* Search filter */}
-				<div className="px-4 py-2 border-b border-[#3c3836]">
+				<div className="px-4 py-2 border-b border-zinc-100">
 					<input
 						type="text"
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						placeholder="Filter by name or SKU…"
-						className="w-full bg-transparent border-b border-[#3c3836] text-[#ebdbb2] font-mono text-sm py-1 focus:outline-none focus:border-[#fabd2f] transition-colors placeholder:text-[#665c54]"
+						className="w-full bg-transparent border-b border-zinc-200 text-zinc-900 text-sm py-1 focus:outline-none focus:border-blue-500 transition-colors placeholder:text-zinc-400"
 					/>
 				</div>
 
 				{/* Product grid */}
 				<div className="flex-1 overflow-y-auto p-4">
 					{catalogLoading ? (
-						<p className="text-[#928374] font-mono text-sm">
-							Loading…
-						</p>
+						<p className="text-zinc-400 text-sm animate-pulse">Loading…</p>
 					) : catalogError ? (
-						<p className="text-[#fb4934] font-mono text-sm">
-							{catalogError}
-						</p>
+						<p className="text-rose-600 text-sm">{catalogError}</p>
 					) : filteredProducts.length === 0 ? (
-						<p className="text-[#928374] font-mono text-sm">
-							No products found.
-						</p>
+						<p className="text-zinc-400 text-sm">No products found.</p>
 					) : (
 						<div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
 							{filteredProducts.map((product) => (
@@ -396,25 +351,22 @@ export default function PosPage() {
 			</div>
 
 			{/* ── Right panel: cart ───────────────────────────────────────── */}
-			<div className="flex flex-col w-80 xl:w-96 bg-[#1d2021]">
+			<div className="flex flex-col w-80 xl:w-96 bg-zinc-50 border-l border-zinc-200">
 				{/* Customer section */}
-				<div className="px-4 py-3 border-b border-[#3c3836]">
+				<div className="px-4 py-3 border-b border-zinc-200 bg-white">
 					{attachedCustomer ? (
 						<div className="flex items-start justify-between">
 							<div>
-								<p className="text-[#ebdbb2] font-mono text-sm font-bold">
+								<p className="text-zinc-900 text-sm font-semibold">
 									{attachedCustomer.name}
 								</p>
-								<p className="text-[#b8bb26] font-mono text-xs">
-									Credit: $
-									{parseFloat(
-										attachedCustomer.store_credit_balance,
-									).toFixed(2)}
+								<p className="font-mono text-xs text-emerald-600 tabular-nums">
+									Credit: ${parseFloat(attachedCustomer.store_credit_balance).toFixed(2)}
 								</p>
 							</div>
 							<button
 								onClick={detachCustomer}
-								className="text-[#665c54] hover:text-[#fb4934] font-mono text-xs transition-colors"
+								className="text-zinc-400 hover:text-rose-600 text-xs transition-colors"
 							>
 								Detach
 							</button>
@@ -424,28 +376,20 @@ export default function PosPage() {
 							<input
 								type="text"
 								value={customerSearch}
-								onChange={(e) =>
-									setCustomerSearch(e.target.value)
-								}
+								onChange={(e) => setCustomerSearch(e.target.value)}
 								placeholder="Attach customer by name or email…"
-								className="w-full bg-[#282828] border border-[#504945] text-[#ebdbb2] font-mono text-xs px-3 py-2 focus:outline-none focus:border-[#83a598] transition-colors placeholder:text-[#665c54]"
+								className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-xs px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors placeholder:text-zinc-400"
 							/>
 							{customerResults.length > 0 && (
-								<ul className="absolute top-full left-0 right-0 bg-[#282828] border border-[#504945] border-t-0 z-10 max-h-48 overflow-y-auto">
+								<ul className="absolute top-full left-0 right-0 bg-white border border-zinc-200 rounded-b-lg border-t-0 z-10 max-h-48 overflow-y-auto shadow-md">
 									{customerResults.map((customer) => (
 										<li key={customer.id}>
 											<button
-												onClick={() =>
-													attachCustomer(customer)
-												}
-												className="w-full text-left px-3 py-2 font-mono text-xs text-[#ebdbb2] hover:bg-[#3c3836] transition-colors"
+												onClick={() => attachCustomer(customer)}
+												className="w-full text-left px-3 py-2 text-xs text-zinc-900 hover:bg-zinc-50 transition-colors"
 											>
-												<span className="text-[#ebdbb2]">
-													{customer.name}
-												</span>
-												<span className="text-[#928374] ml-2">
-													{customer.email}
-												</span>
+												<span className="font-medium">{customer.name}</span>
+												<span className="text-zinc-400 ml-2">{customer.email}</span>
 											</button>
 										</li>
 									))}
@@ -456,32 +400,26 @@ export default function PosPage() {
 				</div>
 
 				{/* Cart header */}
-				<div className="px-4 py-2 border-b border-[#3c3836]">
-					<h2 className="text-[#fabd2f] font-mono font-bold text-sm">
-						Cart
-					</h2>
+				<div className="px-4 py-2 border-b border-zinc-200 bg-white">
+					<h2 className="text-zinc-900 font-semibold text-sm">Cart</h2>
 				</div>
 
 				{/* Cart items */}
-				<div className="flex-1 overflow-y-auto">
+				<div className="flex-1 overflow-y-auto bg-white">
 					{cart.length === 0 ? (
-						<p className="text-[#665c54] font-mono text-sm px-4 py-6 text-center">
+						<p className="text-zinc-400 text-sm px-4 py-6 text-center">
 							Cart is empty.
 							<br />
 							Click a product or scan a SKU.
 						</p>
 					) : (
-						<ul className="divide-y divide-[#3c3836]">
+						<ul className="divide-y divide-zinc-100">
 							{cart.map((item) => (
 								<CartRow
 									key={item.product.id}
 									item={item}
-									onQuantityChange={(qty) =>
-										setQuantity(item.product.id, qty)
-									}
-									onRemove={() =>
-										removeFromCart(item.product.id)
-									}
+									onQuantityChange={(qty) => setQuantity(item.product.id, qty)}
+									onRemove={() => removeFromCart(item.product.id)}
 								/>
 							))}
 						</ul>
@@ -489,37 +427,27 @@ export default function PosPage() {
 				</div>
 
 				{/* Totals + payment + checkout */}
-				<div className="border-t border-[#3c3836] p-4 space-y-3">
+				<div className="border-t border-zinc-200 p-4 space-y-3 bg-white">
 					{/* Total / credit breakdown */}
 					<div className="space-y-1">
 						<div className="flex justify-between items-baseline">
-							<span className="text-[#a89984] font-mono text-sm">
-								Total
-							</span>
-							<span className="text-[#fabd2f] font-mono text-xl font-bold">
+							<span className="text-zinc-500 text-sm">Total</span>
+							<span className="font-mono text-xl font-bold text-zinc-900 tabular-nums">
 								${cartTotal.toFixed(2)}
 							</span>
 						</div>
 						{creditApplied > 0 && (
 							<>
 								<div className="flex justify-between items-baseline">
-									<span className="text-[#b8bb26] font-mono text-xs">
-										Store Credit
-									</span>
-									<span className="text-[#b8bb26] font-mono text-xs">
+									<span className="text-emerald-600 text-xs">Store Credit</span>
+									<span className="font-mono text-xs text-emerald-600 tabular-nums">
 										−${creditApplied.toFixed(2)}
 									</span>
 								</div>
-								<div className="flex justify-between items-baseline border-t border-[#3c3836] pt-1">
-									<span className="text-[#ebdbb2] font-mono text-sm">
-										Due
-									</span>
-									<span className="text-[#ebdbb2] font-mono text-sm font-bold">
-										$
-										{Math.max(
-											0,
-											cartTotal - creditApplied,
-										).toFixed(2)}
+								<div className="flex justify-between items-baseline border-t border-zinc-100 pt-1">
+									<span className="text-zinc-700 text-sm font-medium">Due</span>
+									<span className="font-mono text-sm font-bold text-zinc-900 tabular-nums">
+										${Math.max(0, cartTotal - creditApplied).toFixed(2)}
 									</span>
 								</div>
 							</>
@@ -527,44 +455,28 @@ export default function PosPage() {
 					</div>
 
 					{/* Payment method buttons */}
-					<div className="grid grid-cols-2 gap-1">
-						{(["cash", "card"] as PaymentMethod[]).map(
-							(method) => (
-								<button
-									key={method}
-									onClick={() => setPaymentMethod(method)}
-									className={paymentButtonClass(
-										paymentMethod === method,
-									)}
-								>
-									{method === "cash" ? "Cash" : "Card"}
-								</button>
-							),
-						)}
-						{/* Credit options — only shown when a customer is attached */}
+					<div className="grid grid-cols-2 gap-1.5">
+						{(["cash", "card"] as PaymentMethod[]).map((method) => (
+							<button
+								key={method}
+								onClick={() => setPaymentMethod(method)}
+								className={paymentButtonClass(paymentMethod === method)}
+							>
+								{method === "cash" ? "Cash" : "Card"}
+							</button>
+						))}
 						{attachedCustomer &&
 							balance > 0 &&
-							(
-								[
-									"store_credit",
-									"split",
-								] as PaymentMethod[]
-							).map((method) => (
+							(["store_credit", "split"] as PaymentMethod[]).map((method) => (
 								<button
 									key={method}
 									onClick={() => {
 										setPaymentMethod(method);
-										if (method === "split")
-											setCreditAmount("");
+										if (method === "split") setCreditAmount("");
 									}}
-									className={paymentButtonClass(
-										paymentMethod === method,
-										"credit",
-									)}
+									className={paymentButtonClass(paymentMethod === method, "credit")}
 								>
-									{method === "store_credit"
-										? "Credit"
-										: "Split"}
+									{method === "store_credit" ? "Credit" : "Split"}
 								</button>
 							))}
 					</div>
@@ -572,7 +484,7 @@ export default function PosPage() {
 					{/* Split: credit amount input */}
 					{paymentMethod === "split" && attachedCustomer && (
 						<div>
-							<label className="block text-[#a89984] font-mono text-xs uppercase tracking-wider mb-1">
+							<label className="block text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1.5">
 								Credit to apply (max ${maxCredit.toFixed(2)})
 							</label>
 							<input
@@ -581,10 +493,8 @@ export default function PosPage() {
 								min="0.01"
 								max={maxCredit}
 								value={creditAmount}
-								onChange={(e) =>
-									setCreditAmount(e.target.value)
-								}
-								className="w-full bg-[#282828] border border-[#504945] text-[#ebdbb2] font-mono text-sm px-3 py-2 focus:outline-none focus:border-[#b8bb26] transition-colors"
+								onChange={(e) => setCreditAmount(e.target.value)}
+								className="w-full bg-white border border-zinc-200 rounded-lg text-zinc-900 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors font-mono"
 							/>
 						</div>
 					)}
@@ -593,7 +503,7 @@ export default function PosPage() {
 					<button
 						onClick={handleCheckout}
 						disabled={cart.length === 0 || checkoutLoading}
-						className="w-full bg-[#b8bb26] text-[#282828] font-mono font-bold py-3 hover:bg-[#98971a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+						className="w-full bg-emerald-600 text-white font-semibold py-3 rounded-lg shadow-sm hover:bg-emerald-700 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
 					>
 						{checkoutLoading ? "Processing…" : "Checkout"}
 					</button>
@@ -601,7 +511,7 @@ export default function PosPage() {
 					{cart.length > 0 && (
 						<button
 							onClick={clearCart}
-							className="w-full text-[#928374] font-mono text-xs hover:text-[#fb4934] transition-colors"
+							className="w-full text-zinc-400 text-xs hover:text-rose-600 transition-colors"
 						>
 							Clear cart
 						</button>
@@ -612,10 +522,10 @@ export default function PosPage() {
 			{/* ── Toast ───────────────────────────────────────────────────── */}
 			{toast && (
 				<div
-					className={`fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 font-mono text-sm border shadow-lg ${
+					className={`fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 text-sm rounded-lg shadow-lg border ${
 						toast.ok
-							? "bg-[#1d2021] border-[#b8bb26] text-[#b8bb26]"
-							: "bg-[#1d2021] border-[#fb4934] text-[#fb4934]"
+							? "bg-white border-emerald-200 text-emerald-700"
+							: "bg-white border-rose-200 text-rose-700"
 					}`}
 				>
 					{toast.message}
@@ -639,28 +549,26 @@ function ProductCard({
 		<button
 			onClick={onClick}
 			disabled={outOfStock}
-			className={`text-left border p-3 transition-colors w-full ${
+			className={`text-left rounded-lg border p-3 transition-all duration-200 w-full ${
 				outOfStock
-					? "border-[#3c3836] opacity-40 cursor-not-allowed"
-					: "border-[#504945] hover:border-[#fabd2f] hover:bg-[#3c3836] cursor-pointer"
+					? "border-zinc-100 bg-zinc-50 opacity-50 cursor-not-allowed"
+					: "border-zinc-200 bg-white hover:border-blue-300 hover:shadow-sm cursor-pointer"
 			}`}
 		>
-			<p className="text-[#ebdbb2] font-mono text-sm leading-tight line-clamp-2">
+			<p className="text-zinc-900 text-sm leading-tight line-clamp-2 font-medium">
 				{product.name}
 			</p>
 			{product.is_tcg_single && product.game && (
-				<p className="text-[#83a598] font-mono text-xs mt-1">
+				<p className="text-zinc-400 text-xs mt-1">
 					{product.game}
 					{product.condition ? ` · ${product.condition}` : ""}
 				</p>
 			)}
 			<div className="flex justify-between items-baseline mt-2">
-				<span className="text-[#fabd2f] font-mono text-sm font-bold">
+				<span className="font-mono text-sm font-bold text-zinc-900 tabular-nums">
 					${parseFloat(product.price).toFixed(2)}
 				</span>
-				<span
-					className={`font-mono text-xs ${outOfStock ? "text-[#fb4934]" : "text-[#928374]"}`}
-				>
+				<span className={`font-mono text-xs tabular-nums ${outOfStock ? "text-rose-500" : "text-zinc-400"}`}>
 					{outOfStock ? "Out" : `×${product.stock_quantity}`}
 				</span>
 			</div>
@@ -681,12 +589,12 @@ function CartRow({
 	return (
 		<li className="px-4 py-3">
 			<div className="flex justify-between items-start mb-2">
-				<p className="text-[#ebdbb2] font-mono text-sm leading-tight flex-1 mr-2">
+				<p className="text-zinc-900 text-sm leading-tight flex-1 mr-2 font-medium">
 					{item.product.name}
 				</p>
 				<button
 					onClick={onRemove}
-					className="text-[#665c54] hover:text-[#fb4934] font-mono text-xs transition-colors shrink-0"
+					className="text-zinc-300 hover:text-rose-500 text-xs transition-colors shrink-0"
 				>
 					✕
 				</button>
@@ -695,21 +603,21 @@ function CartRow({
 				<div className="flex items-center gap-1">
 					<button
 						onClick={() => onQuantityChange(item.quantity - 1)}
-						className="w-6 h-6 border border-[#504945] text-[#a89984] hover:text-[#ebdbb2] font-mono text-sm transition-colors"
+						className="w-6 h-6 border border-zinc-200 rounded text-zinc-500 hover:text-zinc-900 text-sm transition-colors"
 					>
 						−
 					</button>
-					<span className="text-[#ebdbb2] font-mono text-sm w-6 text-center">
+					<span className="text-zinc-900 text-sm w-6 text-center font-mono tabular-nums">
 						{item.quantity}
 					</span>
 					<button
 						onClick={() => onQuantityChange(item.quantity + 1)}
-						className="w-6 h-6 border border-[#504945] text-[#a89984] hover:text-[#ebdbb2] font-mono text-sm transition-colors"
+						className="w-6 h-6 border border-zinc-200 rounded text-zinc-500 hover:text-zinc-900 text-sm transition-colors"
 					>
 						+
 					</button>
 				</div>
-				<span className="text-[#a89984] font-mono text-sm">
+				<span className="font-mono text-sm text-zinc-500 tabular-nums">
 					${lineTotal.toFixed(2)}
 				</span>
 			</div>
@@ -718,9 +626,9 @@ function CartRow({
 }
 
 function paymentButtonClass(active: boolean, variant?: "credit") {
-	const base = "font-mono text-xs py-2 border transition-colors";
+	const base = "text-xs py-2 rounded-lg border transition-all duration-200 font-medium";
 	if (active) {
-		return `${base} ${variant === "credit" ? "border-[#b8bb26] bg-[#3c3836] text-[#b8bb26]" : "border-[#fabd2f] bg-[#3c3836] text-[#fabd2f]"}`;
+		return `${base} ${variant === "credit" ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-blue-500 bg-blue-50 text-blue-700"}`;
 	}
-	return `${base} border-[#504945] text-[#928374] hover:border-[#665c54] hover:text-[#ebdbb2]`;
+	return `${base} border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-900`;
 }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { extractSessionToken, readSetCookieHeaders } from "@/lib/auth-cookies";
+
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8080";
 
 export async function POST(request: Request) {
@@ -9,6 +11,7 @@ export async function POST(request: Request) {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(body),
+		cache: "no-store",
 	});
 
 	const data = await backendResponse.json();
@@ -17,20 +20,21 @@ export async function POST(request: Request) {
 		return NextResponse.json(data, { status: backendResponse.status });
 	}
 
-	// Extract the session token from the backend's Set-Cookie header and re-set
-	// it explicitly so Next.js owns the cookie rather than relying on the rewrite
-	// to forward it (unreliable with Turbopack in dev).
-	const setCookieHeader = backendResponse.headers.get("set-cookie");
-	const token = setCookieHeader?.match(/^session=([^;]+)/)?.[1];
+	const token = extractSessionToken(readSetCookieHeaders(backendResponse.headers));
+
+	if (!token) {
+		return NextResponse.json(
+			{ error: "Login succeeded but no session was issued" },
+			{ status: 502 },
+		);
+	}
 
 	const response = NextResponse.json(data, { status: 200 });
-	if (token) {
-		response.cookies.set("session", token, {
-			httpOnly: true,
-			sameSite: "lax",
-			path: "/",
-			maxAge: 86400,
-		});
-	}
+	response.cookies.set("session", token, {
+		httpOnly: true,
+		sameSite: "lax",
+		path: "/",
+		maxAge: 86400,
+	});
 	return response;
 }

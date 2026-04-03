@@ -288,6 +288,7 @@ mod tests {
             id: Uuid::new_v4(),
             username: "test".into(),
             role: crate::models::user::UserRole::Cashier,
+            theme_preference: "light".into(),
         }
     }
 
@@ -436,6 +437,7 @@ mod tests {
             id: user_id,
             username: "teststaff".into(),
             role: crate::models::user::UserRole::Cashier,
+            theme_preference: "light".into(),
         };
 
         let payload = CheckoutRequest {
